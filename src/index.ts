@@ -11,8 +11,6 @@ function getCorsHeaders(request: Request): Record<string, string> {
 
     if (origin && ALLOWED_ORIGINS.includes(origin)) {
         headers['Access-Control-Allow-Origin'] = origin;
-    } else {
-        headers['Access-Control-Allow-Origin'] = '*';
     }
 
     return headers;
