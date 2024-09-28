@@ -78,13 +78,35 @@ async function handleSimulationGet(env: Env, request: Request): Promise<Response
         const result = await env.DB.prepare(
             'SELECT * FROM simulations WHERE id = ?'
         ).bind(simulationId).first();
+
         if (!result) {
             return new Response(JSON.stringify({ message: 'Simulation not found' }), {
                 status: 404,
                 headers: { 'Content-Type': 'application/json' }
             });
         }
+
         return new Response(JSON.stringify(result), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    async function getByUser(userId: string): Promise<Response> {
+        const results = await env.DB.prepare(
+            'SELECT * FROM simulations WHERE user_id = ?'
+        ).bind(userId).all();
+
+        console.log(results);
+
+        if (!results || results.results.length === 0) {
+            return new Response(JSON.stringify({ message: 'User not found' }), {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        return new Response(JSON.stringify(results), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
         });
@@ -98,6 +120,13 @@ async function handleSimulationGet(env: Env, request: Request): Promise<Response
                 throw new Error('Invalid simulation ID');
             }
             return await getById(simulationId);
+        } else if (url.searchParams.has('user')) {
+            const userId = url.searchParams.get('user');
+            if (userId === null) {
+                throw new Error('Invalid user ID');
+            }
+            
+            return await getByUser(userId);
         } else {
             return new Response(JSON.stringify({ message: 'Query not valid' }), {
                 status: 404,
